@@ -13,8 +13,7 @@
 		font-family: var(--font-sans);
 	}
 
-	html,
-	body,
+	/* Dashboard layout needs fixed height and overflow control */
 	#app {
 		@apply h-full overflow-hidden;
 	}
