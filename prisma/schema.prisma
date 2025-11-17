@@ -55,7 +55,7 @@ model Session {
   userId    String   @map("user_id")
   expiresAt DateTime @map("expires_at")
 
-  user Admin @relation(references: [id], fields: [userId], onDelete: Cascade)
+  admin Admin @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   @@index([userId])
   @@map("sessions")
