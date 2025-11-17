@@ -6,7 +6,7 @@
 
 	let { data } = $props();
 
-	const { form, errors, enhance, delayed } = superForm(data.form, {
+	const { form, errors, enhance, delayed, message } = superForm(data.form, {
 		validators: zodClient(registrationSchema)
 	});
 
@@ -37,6 +37,13 @@
 
 		<!-- Registration Form -->
 		<div class="card-base p-8">
+			<!-- Error Message -->
+			{#if $message}
+				<div class="mb-4 p-4 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 rounded-lg">
+					<p class="text-sm text-error-700 dark:text-error-400">{$message}</p>
+				</div>
+			{/if}
+
 			<form method="POST" use:enhance class="space-y-5">
 				<!-- Organization Name -->
 				<div>
