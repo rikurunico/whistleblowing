@@ -17,13 +17,7 @@ const config = {
 			$types: './src/lib/types'
 		},
 		csrf: {
-			checkOrigin: true,
-			// Allow GitHub Codespaces and localhost origins
-			trustedOrigins: [
-				/^https:\/\/.*\.app\.github\.dev$/,
-				'http://localhost:3000',
-				'http://localhost:5173'
-			]
+			checkOrigin: false
 		}
 	}
 };
