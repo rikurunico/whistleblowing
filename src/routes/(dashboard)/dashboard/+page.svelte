@@ -1,40 +1,14 @@
 <script lang="ts">
 	import { FileText, AlertCircle, CheckCircle, Clock, TrendingUp } from 'lucide-svelte';
+	import type { PageData } from './$types';
 
-	// Mock data - will be replaced with real data from API
-	const stats = {
-		totalReports: 24,
-		newReports: 3,
-		inProgress: 8,
-		resolved: 13
-	};
+	let { data }: { data: PageData } = $props();
 
-	const recentReports = [
-		{
-			id: '1',
-			title: 'Safety concern in warehouse',
-			category: 'Safety',
-			status: 'NEW',
-			priority: 'HIGH',
-			createdAt: new Date('2024-01-15T10:30:00')
-		},
-		{
-			id: '2',
-			title: 'Financial irregularity',
-			category: 'Corruption',
-			status: 'IN_REVIEW',
-			priority: 'CRITICAL',
-			createdAt: new Date('2024-01-14T15:20:00')
-		},
-		{
-			id: '3',
-			title: 'Workplace harassment',
-			category: 'Harassment',
-			status: 'IN_PROGRESS',
-			priority: 'MEDIUM',
-			createdAt: new Date('2024-01-13T09:15:00')
-		}
-	];
+	const stats = data.stats;
+	const recentReports = data.recentReports.map((r) => ({
+		...r,
+		createdAt: new Date(r.createdAt)
+	}));
 
 	function getStatusColor(status: string) {
 		switch (status) {

@@ -1,23 +1,13 @@
 <script lang="ts">
 	import { Users, Plus, Search, Mail, Shield } from 'lucide-svelte';
+	import type { PageData } from './$types';
 
-	// Mock data - will be replaced with real data from API
-	const teamMembers = [
-		{
-			id: '1',
-			name: 'John Doe',
-			email: 'john@example.com',
-			role: 'ADMIN',
-			createdAt: new Date('2024-01-01T00:00:00')
-		},
-		{
-			id: '2',
-			name: 'Jane Smith',
-			email: 'jane@example.com',
-			role: 'MEMBER',
-			createdAt: new Date('2024-01-15T00:00:00')
-		}
-	];
+	let { data }: { data: PageData } = $props();
+
+	const teamMembers = data.teamMembers.map((m) => ({
+		...m,
+		createdAt: new Date(m.createdAt)
+	}));
 
 	function getRoleBadge(role: string) {
 		switch (role) {
