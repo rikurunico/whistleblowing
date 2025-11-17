@@ -39,12 +39,16 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 # Set ownership
-RUN chown -R nodejs:nodejs /app
+RUN chown -R nodejs:nodejs /app && \
+    chmod +x /app/docker-entrypoint.sh
 
 USER nodejs
 
@@ -58,5 +62,5 @@ ENV PORT=3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/', (r) => {if (r.statusCode === 200) process.exit(0); process.exit(1);})"
 
-# Start application
-CMD ["node", "build"]
+# Start application with migrations
+CMD ["/app/docker-entrypoint.sh"]
