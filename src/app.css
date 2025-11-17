@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+		--font-mono: 'Fira Code', 'Consolas', monospace;
+	}
+
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-surface-50 dark:bg-neutral-900 text-surface-900 dark:text-surface-50;
+		font-family: var(--font-sans);
+	}
+
+	html,
+	body,
+	#app {
+		@apply h-full overflow-hidden;
+	}
+}
+
+@layer components {
+	/* Custom scrollbar */
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		@apply bg-surface-100 dark:bg-neutral-800;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		@apply bg-surface-300 dark:bg-neutral-600 rounded-full;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+		@apply bg-surface-400 dark:bg-neutral-500;
+	}
+
+	/* Focus ring for accessibility */
+	.focus-ring {
+		@apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-50 dark:focus:ring-offset-neutral-900;
+	}
+
+	/* Card component */
+	.card-base {
+		@apply bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-surface-200 dark:border-neutral-700;
+	}
+
+	/* Button variants */
+	.btn-primary {
+		@apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+	}
+
+	.btn-secondary {
+		@apply bg-surface-200 dark:bg-neutral-700 hover:bg-surface-300 dark:hover:bg-neutral-600 text-surface-900 dark:text-surface-50 font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+	}
+
+	.btn-danger {
+		@apply bg-error-600 hover:bg-error-700 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+	}
+
+	/* Input fields */
+	.input-base {
+		@apply w-full px-3 py-2 bg-white dark:bg-neutral-900 border border-surface-300 dark:border-neutral-600 rounded-lg focus-ring placeholder:text-surface-400 dark:placeholder:text-neutral-500;
+	}
+
+	/* Badge */
+	.badge {
+		@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+	}
+
+	.badge-primary {
+		@apply bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400;
+	}
+
+	.badge-success {
+		@apply bg-success-100 text-success-800 dark:bg-success-900/20 dark:text-success-400;
+	}
+
+	.badge-warning {
+		@apply bg-warning-100 text-warning-800 dark:bg-warning-900/20 dark:text-warning-400;
+	}
+
+	.badge-error {
+		@apply bg-error-100 text-error-800 dark:bg-error-900/20 dark:text-error-400;
+	}
+}
+
+@layer utilities {
+	.animate-fade-in {
+		animation: fadeIn 0.3s ease-in-out;
+	}
+
+	.animate-slide-up {
+		animation: slideUp 0.3s ease-out;
+	}
+
+	.animate-slide-down {
+		animation: slideDown 0.3s ease-out;
+	}
+}
