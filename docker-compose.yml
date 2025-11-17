@@ -70,6 +70,7 @@ services:
       S3_SECRET_KEY: minioadmin
       S3_BUCKET: openwhistle-files
       PUBLIC_APP_URL: http://localhost:3000
+      DB_SEED: 'true' # Set to 'false' in production after initial setup
       # Generate these secrets before production use
       JWT_SECRET: change-this-in-production-min-32-chars-random
       ENCRYPTION_KEY: change-this-in-production-32-byte-hex-string

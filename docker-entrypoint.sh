@@ -12,5 +12,11 @@ else
   npx prisma db push --skip-generate
 fi
 
+# Run database seeder if enabled
+if [ "$DB_SEED" = "true" ]; then
+  echo "Running database seeder..."
+  npm run db:seed
+fi
+
 echo "Starting application..."
 exec node build
