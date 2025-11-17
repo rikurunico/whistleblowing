@@ -1,0 +1,293 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ORGANIZATIONS & USERS
+// ==========================================
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  admins    Admin[]
+  projects  Project[]
+  webhooks  Webhook[]
+  auditLogs AuditLog[]
+
+  @@map("organizations")
+}
+
+model Admin {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String   @map("password_hash")
+  name           String
+  role           UserRole @default(ADMIN)
+  organizationId String   @map("organization_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sessions     Session[]
+
+  @@index([organizationId])
+  @@map("admins")
+}
+
+model Session {
+  id        String   @id
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+
+  user Admin @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MEMBER
+}
+
+// ==========================================
+// PROJECTS & URLS
+// ==========================================
+
+model Project {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?  @db.Text
+  publicToken    String   @unique @map("public_token")
+  categories     String[] @default([])
+  customMessage  String?  @db.Text @map("custom_message")
+  settings       Json     @default("{}")
+  theme          Json     @default("{}")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  urls         ProjectUrl[]
+  reports      Report[]
+
+  @@index([organizationId])
+  @@index([publicToken])
+  @@map("projects")
+}
+
+model ProjectUrl {
+  id        String        @id @default(uuid())
+  projectId String        @map("project_id")
+  type      ProjectUrlType
+  slug      String        @unique
+  fullUrl   String        @map("full_url")
+  shortUrl  String?       @map("short_url")
+  qrCode    String?       @db.Text @map("qr_code")
+  clicks    Int           @default(0)
+  isActive  Boolean       @default(true) @map("is_active")
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([slug])
+  @@map("project_urls")
+}
+
+enum ProjectUrlType {
+  MAIN
+  ALIAS
+  STEALTH
+  HONEYPOT
+}
+
+// ==========================================
+// REPORTS
+// ==========================================
+
+model Report {
+  id                String       @id @default(uuid())
+  projectId         String       @map("project_id")
+  reportToken       String       @unique @map("report_token")
+  title             String?
+  contentEncrypted  String       @db.Text @map("content_encrypted")
+  category          String?
+  status            ReportStatus @default(NEW)
+  priority          Priority     @default(MEDIUM)
+  submitterEmail    String?      @map("submitter_email")
+  metadata          Json         @default("{}")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  resolvedAt        DateTime?    @map("resolved_at")
+
+  // Relations
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  attachments   Attachment[]
+  conversations Conversation[]
+
+  @@index([projectId])
+  @@index([reportToken])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+enum ReportStatus {
+  NEW
+  IN_REVIEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ==========================================
+// ATTACHMENTS
+// ==========================================
+
+model Attachment {
+  id               String   @id @default(uuid())
+  reportId         String   @map("report_id")
+  filename         String
+  originalFilename String   @map("original_filename")
+  mimeType         String   @map("mime_type")
+  size             Int
+  storageUrl       String   @map("storage_url")
+  encryptionKey    String?  @map("encryption_key")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@map("attachments")
+}
+
+// ==========================================
+// CONVERSATIONS
+// ==========================================
+
+model Conversation {
+  id               String   @id @default(uuid())
+  reportId         String   @map("report_id")
+  messageEncrypted String   @db.Text @map("message_encrypted")
+  sender           Sender
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@index([createdAt])
+  @@map("conversations")
+}
+
+enum Sender {
+  WHISTLEBLOWER
+  ADMIN
+  SYSTEM
+}
+
+// ==========================================
+// WEBHOOKS
+// ==========================================
+
+model Webhook {
+  id             String        @id @default(uuid())
+  organizationId String        @map("organization_id")
+  name           String
+  type           WebhookType
+  url            String
+  secret         String?
+  events         String[]
+  config         Json          @default("{}")
+  isActive       Boolean       @default(true) @map("is_active")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+
+  @@index([organizationId])
+  @@map("webhooks")
+}
+
+enum WebhookType {
+  TELEGRAM
+  DISCORD
+  SLACK
+  CUSTOM_HTTP
+  WHATSAPP
+}
+
+model WebhookDelivery {
+  id         String   @id @default(uuid())
+  webhookId  String   @map("webhook_id")
+  event      String
+  payload    Json
+  response   Json?
+  statusCode Int?     @map("status_code")
+  success    Boolean  @default(false)
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+// ==========================================
+// AUDIT LOGS
+// ==========================================
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  action         String
+  entityType     String   @map("entity_type")
+  entityId       String?  @map("entity_id")
+  userId         String?  @map("user_id")
+  metadata       Json     @default("{}")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
